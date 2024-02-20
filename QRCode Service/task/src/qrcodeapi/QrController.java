@@ -28,7 +28,7 @@ public class QrController {
     }
 
     @GetMapping("/qrcode")
-    public ResponseEntity<Object> getQrcode(@RequestParam String contents, @RequestParam int size, @RequestParam String type) {
+    public ResponseEntity<Object> getQrcode(@RequestParam String contents, @RequestParam(required = false, defaultValue = "250") int size, @RequestParam(required = false, defaultValue = "png") String type, @RequestParam(required = false, defaultValue = "L") String correction) {
 
         if (Objects.isNull(contents) || contents.isBlank()) {
             throw new QrErrorException("Contents cannot be null or blank");
@@ -41,6 +41,11 @@ public class QrController {
             model.setHeight(size);
         }
 
+        if (!Objects.equals(correction, "L") && !Objects.equals(correction, "M")
+        && !Objects.equals(correction, "Q") && !Objects.equals(correction, "H")) {
+            throw new QrErrorException("Permitted error correction levels are L, M, Q, H");
+        }
+
         MediaType mediaType = switch (type) {
             case "png" -> MediaType.IMAGE_PNG;
             case "jpeg" -> MediaType.IMAGE_JPEG;
@@ -48,7 +53,7 @@ public class QrController {
             default -> throw new QrErrorException("Only png, jpeg and gif image types are supported");
         };
 
-        return ResponseEntity.ok().contentType(mediaType).body(model.getQrcode(contents));
+        return ResponseEntity.ok().contentType(mediaType).body(model.getQrcode(contents, correction));
     }
 
     @ExceptionHandler(QrErrorException.class)
