@@ -123,6 +123,74 @@ files:
     \     } catch (NoSuchAlgorithmException e) {\n            throw new RuntimeException(e);\n\
     \        }\n    }\n}\n"
     learner_created: false
+  - name: src/qrcodeapi/QrController.java
+    visible: true
+    text: |
+      package qrcodeapi;
+      
+      import org.springframework.beans.factory.annotation.Autowired;
+      import org.springframework.http.MediaType;
+      import org.springframework.http.ResponseEntity;
+      import org.springframework.web.bind.annotation.GetMapping;
+      import org.springframework.web.bind.annotation.RestController;
+      
+      @SuppressWarnings("unused")
+      @RestController
+      public class QrController {
+      
+          private final Model model;
+          @Autowired
+          private QrController(Model model) {
+              this.model = model;
+          }
+      
+          @GetMapping("/health")
+          public ResponseEntity<Object> getHealth() {
+              return ResponseEntity.ok().build();
+          }
+      
+          @GetMapping("/qrcode")
+          public ResponseEntity<Object> getQrcode() {
+              return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(model.getQrcode());
+          }
+      }
+    learner_created: true
+  - name: src/qrcodeapi/Model.java
+    visible: true
+    text: |
+      package qrcodeapi;
+      
+      import org.springframework.stereotype.Component;
+      
+      import java.awt.*;
+      import java.awt.image.BufferedImage;
+      
+      @Component
+      class Model {
+          private final int width;
+          private final int height;
+      
+          public Model() {
+              width = 250;
+              height = 250;
+          }
+      
+          public BufferedImage getQrcode() {
+              BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+              Graphics2D g = image.createGraphics();
+      
+              g.setColor(Color.WHITE);
+              g.fillRect(0, 0, width, height);
+              return image;
+          }
+      }
+    learner_created: true
+  - name: src/qrcodeapi/QrErrorException.java
+    visible: true
+    learner_created: true
 feedback_link: https://hyperskill.org/projects/385/stages/2292/implement#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Tue, 20 Feb 2024 15:44:42 UTC"
 record: -1

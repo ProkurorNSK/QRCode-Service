@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 
 import java.awt.image.BufferedImage;
 
+@SuppressWarnings("unused")
 @SpringBootApplication
 public class Application {
     public static void main(String[] args) {
