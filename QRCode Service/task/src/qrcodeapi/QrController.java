@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 @RestController
@@ -27,7 +28,12 @@ public class QrController {
     }
 
     @GetMapping("/qrcode")
-    public ResponseEntity<Object> getQrcode(@RequestParam int size, @RequestParam String type) {
+    public ResponseEntity<Object> getQrcode(@RequestParam String contents, @RequestParam int size, @RequestParam String type) {
+
+        if (Objects.isNull(contents) || contents.isBlank()) {
+            throw new QrErrorException("Contents cannot be null or blank");
+        }
+
         if (size < 150 || size > 350) {
             throw new QrErrorException("Image size must be between 150 and 350 pixels");
         } else {
@@ -42,7 +48,7 @@ public class QrController {
             default -> throw new QrErrorException("Only png, jpeg and gif image types are supported");
         };
 
-        return ResponseEntity.ok().contentType(mediaType).body(model.getQrcode());
+        return ResponseEntity.ok().contentType(mediaType).body(model.getQrcode(contents));
     }
 
     @ExceptionHandler(QrErrorException.class)

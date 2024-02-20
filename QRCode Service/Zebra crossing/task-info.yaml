@@ -141,6 +141,117 @@ files:
     \        }\n    }\n\n    private String encodeUrl(String param) {\n        return\
     \ URLEncoder.encode(param, StandardCharsets.UTF_8);\n    }\n}\n"
     learner_created: false
+  - name: src/qrcodeapi/QrController.java
+    visible: true
+    text: |
+      package qrcodeapi;
+      
+      import org.springframework.beans.factory.annotation.Autowired;
+      import org.springframework.http.HttpStatus;
+      import org.springframework.http.MediaType;
+      import org.springframework.http.ResponseEntity;
+      import org.springframework.web.bind.annotation.ExceptionHandler;
+      import org.springframework.web.bind.annotation.GetMapping;
+      import org.springframework.web.bind.annotation.RequestParam;
+      import org.springframework.web.bind.annotation.RestController;
+      
+      import java.util.Map;
+      
+      @SuppressWarnings("unused")
+      @RestController
+      public class QrController {
+      
+          private final Model model;
+          @Autowired
+          private QrController(Model model) {
+              this.model = model;
+          }
+      
+          @GetMapping("/health")
+          public ResponseEntity<Object> getHealth() {
+              return ResponseEntity.ok().build();
+          }
+      
+          @GetMapping("/qrcode")
+          public ResponseEntity<Object> getQrcode(@RequestParam int size, @RequestParam String type) {
+              if (size < 150 || size > 350) {
+                  throw new QrErrorException("Image size must be between 150 and 350 pixels");
+              } else {
+                  model.setWidth(size);
+                  model.setHeight(size);
+              }
+      
+              MediaType mediaType = switch (type) {
+                  case "png" -> MediaType.IMAGE_PNG;
+                  case "jpeg" -> MediaType.IMAGE_JPEG;
+                  case "gif" -> MediaType.IMAGE_GIF;
+                  default -> throw new QrErrorException("Only png, jpeg and gif image types are supported");
+              };
+      
+              return ResponseEntity.ok().contentType(mediaType).body(model.getQrcode());
+          }
+      
+          @ExceptionHandler(QrErrorException.class)
+          ResponseEntity<Object> handleTicketException(QrErrorException ex) {
+              return new ResponseEntity<>(Map.of("error", ex.getMessage()), HttpStatus.BAD_REQUEST);
+          }
+      }
+    learner_created: true
+  - name: src/qrcodeapi/QrErrorException.java
+    visible: true
+    text: |
+      package qrcodeapi;
+      
+      import org.springframework.web.bind.annotation.ResponseStatus;
+      
+      @ResponseStatus()
+      public class QrErrorException extends RuntimeException{
+          public QrErrorException(String message) {
+              super(message);
+          }
+      }
+    learner_created: true
+  - name: src/qrcodeapi/Model.java
+    visible: true
+    text: |
+      package qrcodeapi;
+      
+      import org.springframework.stereotype.Component;
+      
+      import java.awt.*;
+      import java.awt.image.BufferedImage;
+      
+      @Component
+      class Model {
+          private int width;
+          private int height;
+      
+          public Model() {
+              width = 250;
+              height = 250;
+          }
+      
+          BufferedImage getQrcode() {
+              BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+              Graphics2D g = image.createGraphics();
+      
+              g.setColor(Color.WHITE);
+              g.fillRect(0, 0, width, height);
+              return image;
+          }
+      
+          void setWidth(int width) {
+              this.width = width;
+          }
+      
+          void setHeight(int height) {
+              this.height = height;
+          }
+      }
+    learner_created: true
 feedback_link: https://hyperskill.org/projects/385/stages/2293/implement#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: "Tue, 20 Feb 2024 16:36:40 UTC"
 record: -1

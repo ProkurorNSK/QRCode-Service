@@ -1,8 +1,12 @@
 package qrcodeapi;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import org.springframework.stereotype.Component;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 
 @Component
@@ -15,13 +19,14 @@ class Model {
         height = 250;
     }
 
-    BufferedImage getQrcode() {
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = image.createGraphics();
-
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, width, height);
-        return image;
+    BufferedImage getQrcode(String contents) {
+        QRCodeWriter writer = new QRCodeWriter();
+        try {
+            BitMatrix bitMatrix = writer.encode(contents, BarcodeFormat.QR_CODE, width, height);
+            return MatrixToImageWriter.toBufferedImage(bitMatrix);
+        } catch (WriterException e) {
+            throw new QrErrorException("");
+        }
     }
 
     void setWidth(int width) {
